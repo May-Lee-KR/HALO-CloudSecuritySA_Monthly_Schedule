@@ -501,19 +501,22 @@
             }
         }
 
+        let globalActivities = [];
+
         function renderHome(sas, allActivities) {
+            globalActivities = allActivities;
             const saGrid = document.getElementById('sa-grid');
             saGrid.innerHTML = sas.map(sa => 
-                `<button class="sa-button" onclick="selectSA('${sa}', ${JSON.stringify(allActivities).replace(/'/g, "\\'")})">${sa}</button>`
+                `<button class="sa-button" onclick="selectSA('${sa}')">${sa}</button>`
             ).join('');
         }
 
-        function selectSA(saName, allActivities) {
+        function selectSA(saName) {
             document.getElementById('home-view').style.display = 'none';
             document.getElementById('dashboard-view').style.display = 'block';
             document.querySelector('.back-button').classList.add('show');
             
-            const activities = allActivities.filter(a => a.sa === saName);
+            const activities = globalActivities.filter(a => a.sa === saName);
             renderDashboard(saName, activities);
         }
 
