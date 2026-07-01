@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SA 월간 업무 스케줄</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #f0f0f0;
+            padding-bottom: 20px;
+        }
+        
+        .title {
+            font-size: 28px;
+            font-weight: 600;
+            color: #1a1a1a;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+        
+        .controls label {
+            font-size: 14px;
+            color: #666;
+            font-weight: 500;
+        }
+        
+        .controls select {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        
+        .controls span {
+            font-size: 12px;
+            color: #999;
+        }
+        
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .calendar-section {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 10px;
+        }
+        
+        .calendar {
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 15px;
+            background: #fafafa;
+        }
+        
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 8px;
+            margin-top: 10px;
+        }
+        
+        .day-header {
+            text-align: center;
+            font-weight: 600;
+            font-size: 12px;
+            color: #666;
+            padding: 8px 0;
+        }
+        
+        .calendar-day {
+            aspect-ratio: 1;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 4px;
+            font-size: 11px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: white;
+            text-align: center;
+            position: relative;
+            min-height: 50px;
+        }
+        
+        .calendar-day.empty {
+            background: #f9f9f9;
+            border: none;
+        }
+        
+        .calendar-day.has-activity {
+            background: #e3f2fd;
+            border-color: #2196f3;
+        }
+        
+        .calendar-day-num {
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+        
+        .activity-badge {
+            display: inline-block;
+            font-size: 9px;
+            padding: 2px 4px;
+            border-radius: 3px;
+            margin-top: 1px;
+        }
+        
+        .badge-planning { background: #e3f2fd; color: #1976d2; }
+        .badge-meeting { background: #fff3e0; color: #f57c00; }
+        .badge-onsite { background: #ffebee; color: #c62828; }
+        .badge-sync { background: #e8f5e9; color: #2e7d32; }
+        
+        .stats-section {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .stat-card {
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 20px;
+            background: white;
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: #999;
+            margin-bottom: 10px;
+        }
+        
+        .stat-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 10px;
+        }
+        
+        .workload-bar {
+            height: 8px;
+            background: #f0f0f0;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+        
+        .workload-fill {
+            height: 100%;
+            background: #4caf50;
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+        
+        .workload-fill.high {
+            background: #f44336;
+        }
+        
+        .workload-fill.medium {
+            background: #ff9800;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            font-size: 12px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            margin-top: 8px;
+        }
+        
+        .status-good { background: #c8e6c9; color: #2e7d32; }
+        .status-medium { background: #ffe0b2; color: #e65100; }
+        .status-high { background: #ffcdd2; color: #c62828; }
+        
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            padding: 8px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        .summary-item:last-child {
+            border-bottom: none;
+        }
+        
+        .summary-label {
+            color: #666;
+        }
+        
+        .summary-value {
+            font-weight: 600;
+            color: #1a1a1a;
+        }
+        
+        .upcoming-section {
+            margin-top: 30px;
+            border-top: 2px solid #f0f0f0;
+            padding-top: 30px;
+        }
+        
+        .tasks-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .task-item {
+            border-left: 3px solid #2196f3;
+            padding: 12px;
+            background: #f9f9f9;
+            border-radius: 6px;
+            border: 1px solid #e0e0e0;
+        }
+        
+        .task-item.planning { border-left-color: #2196f3; }
+        .task-item.meeting { border-left-color: #ff9800; }
+        .task-item.onsite { border-left-color: #f44336; }
+        .task-item.sync { border-left-color: #4caf50; }
+        
+        .task-title {
+            font-weight: 600;
+            font-size: 13px;
+            color: #1a1a1a;
+            margin-bottom: 4px;
+        }
+        
+        .task-meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #999;
+        }
+        
+        .task-type {
+            display: inline-block;
+            font-size: 11px;
+            padding: 2px 8px;
+            border-radius: 3px;
+            background: white;
+        }
+        
+        .type-planning { background: #e3f2fd; color: #1976d2; }
+        .type-meeting { background: #fff3e0; color: #f57c00; }
+        .type-onsite { background: #ffebee; color: #c62828; }
+        .type-sync { background: #e8f5e9; color: #2e7d32; }
+        
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #999;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px 20px;
+            color: #666;
+        }
+        
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="title">SA 월간 업무 스케줄</div>
+            <div class="controls">
+                <label for="sa-select">SA 선택:</label>
+                <select id="sa-select">
+                    <option>로딩 중...</option>
+                </select>
+                <span id="update-date">업데이트: -</span>
+            </div>
+        </div>
+
+        <div id="content" class="loading">데이터 로딩 중...</div>
+    </div>
+
+    <script>
+        const SPREADSHEET_ID = '1HOh9bDklP3j0OCS_K4Vayi5IsfNZ-X827CqxsFU1BQg';
+        const API_KEY = 'AIzaSyDst1EWx9FXEL5F2aF-8Zd7uBKCawvdF-g';
+        const SHEET_NAME = '7월';
+
+        const typeConfig = {
+            'planning': { label: '계획', class: 'badge-planning', typeClass: 'type-planning' },
+            'meeting': { label: '미팅', class: 'badge-meeting', typeClass: 'type-meeting' },
+            'onsite': { label: '현장', class: 'badge-onsite', typeClass: 'type-onsite' },
+            'sync': { label: '싱크', class: 'badge-sync', typeClass: 'type-sync' }
+        };
+
+        function convertDate(dateStr) {
+            const match = dateStr.match(/(\d+)월\s*(\d+)일/);
+            if (match) {
+                const month = String(match[1]).padStart(2, '0');
+                const day = String(match[2]).padStart(2, '0');
+                return `2026-${month}-${day}`;
+            }
+            return dateStr;
+        }
+
+        function extractType(task) {
+            const taskLower = task.toLowerCase();
+            if (taskLower.includes('회의') || taskLower.includes('협의') || taskLower.includes('미팅')) return 'meeting';
+            if (taskLower.includes('현장') || taskLower.includes('방문') || taskLower.includes('onsite')) return 'onsite';
+            if (taskLower.includes('계획서') || taskLower.includes('계획')) return 'planning';
+            if (taskLower.includes('싱크') || taskLower.includes('sync')) return 'sync';
+            return 'meeting';
+        }
+
+        async function loadData() {
+            try {
+                const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${SHEET_NAME}?key=${API_KEY}`;
+                const response = await fetch(url);
+                const data = await response.json();
+
+                if (!data.values || data.values.length < 2) {
+                    document.getElementById('content').innerHTML = '<div class="empty-state">데이터가 없습니다.</div>';
+                    return;
+                }
+
+                const rows = data.values.slice(1);
+                const activities = rows
+                    .map(row => ({
+                        sa: row[0] || '',
+                        date: convertDate(row[1] || ''),
+                        type: extractType(row[4] || ''),
+                        customer: row[3] || '',
+                        title: row[4] || '',
+                        time: row[5] || ''
+                    }))
+                    .filter(a => a.sa && a.date);
+
+                const sas = [...new Set(activities.map(a => a.sa))];
+                renderUI(sas, activities);
+
+            } catch (error) {
+                document.getElementById('content').innerHTML = `<div class="empty-state">데이터 로드 실패: ${error.message}</div>`;
+                console.error(error);
+            }
+        }
+
+        function renderUI(sas, allActivities) {
+            const saSelect = document.getElementById('sa-select');
+            saSelect.innerHTML = sas.map(sa => `<option value="${sa}">${sa}</option>`).join('');
+
+            function renderDashboard() {
+                const selectedSA = saSelect.value;
+                const activities = allActivities.filter(a => a.sa === selectedSA);
+
+                const now = new Date();
+                const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).getDay();
+                const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+                const calendarDays = [...Array(firstDayOfMonth).fill(null), ...Array(daysInMonth).fill(0).map((_, i) => i + 1)];
+
+                const activityByDate = {};
+                activities.forEach(a => {
+                    if (!activityByDate[a.date]) activityByDate[a.date] = [];
+                    activityByDate[a.date].push(a);
+                });
+
+                const daysWithActivity = Object.keys(activityByDate).length;
+                const totalActivities = activities.length;
+                const workload = Math.round((totalActivities / 22) * 100);
+                const workloadLevel = workload > 75 ? 'high' : workload > 50 ? 'medium' : 'low';
+
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                const nextWeek = activities
+                    .filter(a => {
+                        const aDate = new Date(a.date + 'T00:00:00');
+                        return aDate >= today && aDate < new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000);
+                    })
+                    .sort((a, b) => new Date(a.date) - new Date(b.date));
+
+                let calendarHTML = '<div class="calendar-grid">';
+                ['일', '월', '화', '수', '목', '금', '토'].forEach(d => {
+                    calendarHTML += `<div class="day-header">${d}</div>`;
+                });
+                
+                calendarHTML += calendarDays.map(day => {
+                    if (day === null) return '<div class="calendar-day empty"></div>';
+                    const dateStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                    const dayActivities = activityByDate[dateStr] || [];
+                    const hasActivity = dayActivities.length > 0;
+                    const badgesHTML = dayActivities.map(a => 
+                        `<div class="activity-badge ${typeConfig[a.type].class}">${typeConfig[a.type].label}</div>`
+                    ).join('');
+                    return `<div class="calendar-day ${hasActivity ? 'has-activity' : ''}"><div class="calendar-day-num">${day}</div>${badgesHTML}</div>`;
+                }).join('');
+                calendarHTML += '</div>';
+
+                let tasksHTML = '';
+                if (nextWeek.length === 0) {
+                    tasksHTML = '<div class="empty-state">예정된 작업이 없습니다</div>';
+                } else {
+                    tasksHTML = nextWeek.map(task => `
+                        <div class="task-item ${task.type}">
+                            <div class="task-title">${task.title}</div>
+                            <div class="task-meta">
+                                <span>${task.customer} • ${new Date(task.date + 'T00:00:00').toLocaleDateString('ko-KR', {month: 'short', day: 'numeric'})}</span>
+                                <span class="task-type ${typeConfig[task.type].typeClass}">${typeConfig[task.type].label}</span>
+                            </div>
+                        </div>
+                    `).join('');
+                }
+
+                const html = `
+                    <div class="main-content">
+                        <div class="calendar-section">
+                            <div class="section-title">월간 달력</div>
+                            <div class="calendar">${calendarHTML}</div>
+                        </div>
+                        <div class="stats-section">
+                            <div class="stat-card">
+                                <div class="stat-label">업무 밀집도</div>
+                                <div class="stat-value">${workload}%</div>
+                                <div class="workload-bar">
+                                    <div class="workload-fill ${workloadLevel}" style="width: ${Math.min(workload, 100)}%"></div>
+                                </div>
+                                <div class="status-badge status-${workloadLevel}">
+                                    ${workloadLevel === 'high' ? '⚠️ 주의' : workloadLevel === 'medium' ? '⚡ 보통' : '✓ 여유'}
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-label">요약</div>
+                                <div class="summary-item">
+                                    <span class="summary-label">총 활동수:</span>
+                                    <span class="summary-value">${totalActivities}개</span>
+                                </div>
+                                <div class="summary-item">
+                                    <span class="summary-label">활동 있는 날:</span>
+                                    <span class="summary-value">${daysWithActivity}일</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="upcoming-section">
+                        <div class="section-title">다음 7일 작업</div>
+                        <div class="tasks-list">${tasksHTML}</div>
+                    </div>
+                `;
+
+                document.getElementById('content').innerHTML = html;
+            }
+
+            saSelect.addEventListener('change', renderDashboard);
+            document.getElementById('update-date').textContent = `업데이트: ${now.toLocaleDateString('ko-KR')}`;
+            renderDashboard();
+        }
+
+        loadData();
+    </script>
+</body>
+</html>
