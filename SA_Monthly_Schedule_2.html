@@ -13,9 +13,10 @@
         
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
-            background-color: #f5f5f5;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: #333;
             padding: 20px;
+            min-height: 100vh;
         }
         
         .container {
@@ -28,6 +29,106 @@
         }
         
         .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .title {
+            font-size: 32px;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            font-size: 16px;
+            color: #666;
+            line-height: 1.6;
+        }
+        
+        .home-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 40px;
+            padding: 40px 20px;
+        }
+        
+        .home-description {
+            text-align: center;
+            max-width: 500px;
+        }
+        
+        .home-description h2 {
+            font-size: 20px;
+            color: #1a1a1a;
+            margin-bottom: 15px;
+        }
+        
+        .home-description p {
+            font-size: 14px;
+            color: #666;
+            line-height: 1.8;
+        }
+        
+        .sa-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+            width: 100%;
+            max-width: 600px;
+        }
+        
+        .sa-button {
+            padding: 30px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            background: white;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            color: #1a1a1a;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+        
+        .sa-button:hover {
+            border-color: #667eea;
+            background: #f8f9ff;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+        }
+        
+        .sa-button:active {
+            transform: translateY(0);
+        }
+        
+        .dashboard-screen {
+            display: none;
+        }
+        
+        .back-button {
+            display: none;
+            margin-bottom: 20px;
+            padding: 8px 16px;
+            background: #f0f0f0;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            color: #666;
+            font-weight: 500;
+        }
+        
+        .back-button:hover {
+            background: #e0e0e0;
+        }
+        
+        .back-button.show {
+            display: block;
+        }
+        
+        .header-bar {
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -36,33 +137,25 @@
             padding-bottom: 20px;
         }
         
-        .title {
-            font-size: 28px;
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .title-small {
+            font-size: 24px;
             font-weight: 600;
             color: #1a1a1a;
         }
         
-        .controls {
+        .header-right {
             display: flex;
             gap: 15px;
             align-items: center;
         }
         
-        .controls label {
-            font-size: 14px;
-            color: #666;
-            font-weight: 500;
-        }
-        
-        .controls select {
-            padding: 8px 12px;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            font-size: 14px;
-            cursor: pointer;
-        }
-        
-        .controls span {
+        .header-right span {
             font-size: 12px;
             color: #999;
         }
@@ -303,23 +396,46 @@
             .main-content {
                 grid-template-columns: 1fr;
             }
+            
+            .sa-grid {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="header">
-            <div class="title">SA 월간 업무 스케줄</div>
-            <div class="controls">
-                <label for="sa-select">SA 선택:</label>
-                <select id="sa-select">
-                    <option>로딩 중...</option>
-                </select>
-                <span id="update-date">업데이트: -</span>
+        <div id="home-view" class="home-screen">
+            <div class="header">
+                <div class="title">SA 월간 업무 스케줄</div>
+                <div class="subtitle">각 SA의 월간 일정과 업무 밀집도를 한눈에 확인합니다</div>
+            </div>
+
+            <div class="home-description">
+                <h2>SA를 선택하세요</h2>
+                <p>팀원의 이름을 클릭하여 월간 일정과 업무 현황을 확인하세요</p>
+            </div>
+
+            <div class="sa-grid" id="sa-grid">
+                로딩 중...
             </div>
         </div>
 
-        <div id="content" class="loading">데이터 로딩 중...</div>
+        <div id="dashboard-view" class="dashboard-screen">
+            <button class="back-button" onclick="goHome()">← 뒤로 가기</button>
+            
+            <div class="header-bar">
+                <div class="header-left">
+                    <div class="title-small">SA 월간 업무 스케줄</div>
+                </div>
+                <div class="header-right">
+                    <span id="current-sa"></span>
+                    <span id="update-date"></span>
+                </div>
+            </div>
+
+            <div id="content" class="loading">데이터 로딩 중...</div>
+        </div>
     </div>
 
     <script>
@@ -360,7 +476,7 @@
                 const data = await response.json();
 
                 if (!data.values || data.values.length < 2) {
-                    document.getElementById('content').innerHTML = '<div class="empty-state">데이터가 없습니다.</div>';
+                    document.getElementById('sa-grid').innerHTML = '<div class="empty-state">데이터가 없습니다.</div>';
                     return;
                 }
 
@@ -377,121 +493,133 @@
                     .filter(a => a.sa && a.date);
 
                 const sas = [...new Set(activities.map(a => a.sa))];
-                renderUI(sas, activities);
+                renderHome(sas, activities);
 
             } catch (error) {
-                document.getElementById('content').innerHTML = `<div class="empty-state">데이터 로드 실패: ${error.message}</div>`;
+                document.getElementById('sa-grid').innerHTML = `<div class="empty-state">데이터 로드 실패: ${error.message}</div>`;
                 console.error(error);
             }
         }
 
-        function renderUI(sas, allActivities) {
-            const saSelect = document.getElementById('sa-select');
-            saSelect.innerHTML = sas.map(sa => `<option value="${sa}">${sa}</option>`).join('');
+        function renderHome(sas, allActivities) {
+            const saGrid = document.getElementById('sa-grid');
+            saGrid.innerHTML = sas.map(sa => 
+                `<button class="sa-button" onclick="selectSA('${sa}', ${JSON.stringify(allActivities).replace(/'/g, "\\'")})">${sa}</button>`
+            ).join('');
+        }
 
-            function renderDashboard() {
-                const selectedSA = saSelect.value;
-                const activities = allActivities.filter(a => a.sa === selectedSA);
+        function selectSA(saName, allActivities) {
+            document.getElementById('home-view').style.display = 'none';
+            document.getElementById('dashboard-view').style.display = 'block';
+            document.querySelector('.back-button').classList.add('show');
+            
+            const activities = allActivities.filter(a => a.sa === saName);
+            renderDashboard(saName, activities);
+        }
 
-                const now = new Date();
-                const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).getDay();
-                const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
-                const calendarDays = [...Array(firstDayOfMonth).fill(null), ...Array(daysInMonth).fill(0).map((_, i) => i + 1)];
+        function goHome() {
+            document.getElementById('home-view').style.display = 'flex';
+            document.getElementById('dashboard-view').style.display = 'none';
+            document.querySelector('.back-button').classList.remove('show');
+        }
 
-                const activityByDate = {};
-                activities.forEach(a => {
-                    if (!activityByDate[a.date]) activityByDate[a.date] = [];
-                    activityByDate[a.date].push(a);
-                });
+        function renderDashboard(saName, activities) {
+            const now = new Date();
+            const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).getDay();
+            const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+            const calendarDays = [...Array(firstDayOfMonth).fill(null), ...Array(daysInMonth).fill(0).map((_, i) => i + 1)];
 
-                const daysWithActivity = Object.keys(activityByDate).length;
-                const totalActivities = activities.length;
-                const workload = Math.round((totalActivities / 22) * 100);
-                const workloadLevel = workload > 75 ? 'high' : workload > 50 ? 'medium' : 'low';
+            const activityByDate = {};
+            activities.forEach(a => {
+                if (!activityByDate[a.date]) activityByDate[a.date] = [];
+                activityByDate[a.date].push(a);
+            });
 
-                const today = new Date();
-                today.setHours(0, 0, 0, 0);
-                const nextWeek = activities
-                    .filter(a => {
-                        const aDate = new Date(a.date + 'T00:00:00');
-                        return aDate >= today && aDate < new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000);
-                    })
-                    .sort((a, b) => new Date(a.date) - new Date(b.date));
+            const daysWithActivity = Object.keys(activityByDate).length;
+            const totalActivities = activities.length;
+            const workload = Math.round((totalActivities / 22) * 100);
+            const workloadLevel = workload > 75 ? 'high' : workload > 50 ? 'medium' : 'low';
 
-                let calendarHTML = '<div class="calendar-grid">';
-                ['일', '월', '화', '수', '목', '금', '토'].forEach(d => {
-                    calendarHTML += `<div class="day-header">${d}</div>`;
-                });
-                
-                calendarHTML += calendarDays.map(day => {
-                    if (day === null) return '<div class="calendar-day empty"></div>';
-                    const dateStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-                    const dayActivities = activityByDate[dateStr] || [];
-                    const hasActivity = dayActivities.length > 0;
-                    const badgesHTML = dayActivities.map(a => 
-                        `<div class="activity-badge ${typeConfig[a.type].class}">${typeConfig[a.type].label}</div>`
-                    ).join('');
-                    return `<div class="calendar-day ${hasActivity ? 'has-activity' : ''}"><div class="calendar-day-num">${day}</div>${badgesHTML}</div>`;
-                }).join('');
-                calendarHTML += '</div>';
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const nextWeek = activities
+                .filter(a => {
+                    const aDate = new Date(a.date + 'T00:00:00');
+                    return aDate >= today && aDate < new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000);
+                })
+                .sort((a, b) => new Date(a.date) - new Date(b.date));
 
-                let tasksHTML = '';
-                if (nextWeek.length === 0) {
-                    tasksHTML = '<div class="empty-state">예정된 작업이 없습니다</div>';
-                } else {
-                    tasksHTML = nextWeek.map(task => `
-                        <div class="task-item ${task.type}">
-                            <div class="task-title">${task.title}</div>
-                            <div class="task-meta">
-                                <span>${task.customer} • ${new Date(task.date + 'T00:00:00').toLocaleDateString('ko-KR', {month: 'short', day: 'numeric'})}</span>
-                                <span class="task-type ${typeConfig[task.type].typeClass}">${typeConfig[task.type].label}</span>
-                            </div>
-                        </div>
-                    `).join('');
-                }
+            let calendarHTML = '<div class="calendar-grid">';
+            ['일', '월', '화', '수', '목', '금', '토'].forEach(d => {
+                calendarHTML += `<div class="day-header">${d}</div>`;
+            });
+            
+            calendarHTML += calendarDays.map(day => {
+                if (day === null) return '<div class="calendar-day empty"></div>';
+                const dateStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                const dayActivities = activityByDate[dateStr] || [];
+                const hasActivity = dayActivities.length > 0;
+                const badgesHTML = dayActivities.map(a => 
+                    `<div class="activity-badge ${typeConfig[a.type].class}">${typeConfig[a.type].label}</div>`
+                ).join('');
+                return `<div class="calendar-day ${hasActivity ? 'has-activity' : ''}"><div class="calendar-day-num">${day}</div>${badgesHTML}</div>`;
+            }).join('');
+            calendarHTML += '</div>';
 
-                const html = `
-                    <div class="main-content">
-                        <div class="calendar-section">
-                            <div class="section-title">월간 달력</div>
-                            <div class="calendar">${calendarHTML}</div>
-                        </div>
-                        <div class="stats-section">
-                            <div class="stat-card">
-                                <div class="stat-label">업무 밀집도</div>
-                                <div class="stat-value">${workload}%</div>
-                                <div class="workload-bar">
-                                    <div class="workload-fill ${workloadLevel}" style="width: ${Math.min(workload, 100)}%"></div>
-                                </div>
-                                <div class="status-badge status-${workloadLevel}">
-                                    ${workloadLevel === 'high' ? '⚠️ 주의' : workloadLevel === 'medium' ? '⚡ 보통' : '✓ 여유'}
-                                </div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="stat-label">요약</div>
-                                <div class="summary-item">
-                                    <span class="summary-label">총 활동수:</span>
-                                    <span class="summary-value">${totalActivities}개</span>
-                                </div>
-                                <div class="summary-item">
-                                    <span class="summary-label">활동 있는 날:</span>
-                                    <span class="summary-value">${daysWithActivity}일</span>
-                                </div>
-                            </div>
+            let tasksHTML = '';
+            if (nextWeek.length === 0) {
+                tasksHTML = '<div class="empty-state">예정된 작업이 없습니다</div>';
+            } else {
+                tasksHTML = nextWeek.map(task => `
+                    <div class="task-item ${task.type}">
+                        <div class="task-title">${task.title}</div>
+                        <div class="task-meta">
+                            <span>${task.customer} • ${new Date(task.date + 'T00:00:00').toLocaleDateString('ko-KR', {month: 'short', day: 'numeric'})}</span>
+                            <span class="task-type ${typeConfig[task.type].typeClass}">${typeConfig[task.type].label}</span>
                         </div>
                     </div>
-                    <div class="upcoming-section">
-                        <div class="section-title">다음 7일 작업</div>
-                        <div class="tasks-list">${tasksHTML}</div>
-                    </div>
-                `;
-
-                document.getElementById('content').innerHTML = html;
+                `).join('');
             }
 
-            saSelect.addEventListener('change', renderDashboard);
+            const html = `
+                <div class="main-content">
+                    <div class="calendar-section">
+                        <div class="section-title">월간 달력</div>
+                        <div class="calendar">${calendarHTML}</div>
+                    </div>
+                    <div class="stats-section">
+                        <div class="stat-card">
+                            <div class="stat-label">업무 밀집도</div>
+                            <div class="stat-value">${workload}%</div>
+                            <div class="workload-bar">
+                                <div class="workload-fill ${workloadLevel}" style="width: ${Math.min(workload, 100)}%"></div>
+                            </div>
+                            <div class="status-badge status-${workloadLevel}">
+                                ${workloadLevel === 'high' ? '⚠️ 주의' : workloadLevel === 'medium' ? '⚡ 보통' : '✓ 여유'}
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">요약</div>
+                            <div class="summary-item">
+                                <span class="summary-label">총 활동수:</span>
+                                <span class="summary-value">${totalActivities}개</span>
+                            </div>
+                            <div class="summary-item">
+                                <span class="summary-label">활동 있는 날:</span>
+                                <span class="summary-value">${daysWithActivity}일</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="upcoming-section">
+                    <div class="section-title">다음 7일 작업</div>
+                    <div class="tasks-list">${tasksHTML}</div>
+                </div>
+            `;
+
+            document.getElementById('content').innerHTML = html;
+            document.getElementById('current-sa').textContent = saName;
             document.getElementById('update-date').textContent = `업데이트: ${now.toLocaleDateString('ko-KR')}`;
-            renderDashboard();
         }
 
         loadData();
